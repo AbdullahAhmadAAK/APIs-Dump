@@ -13,3 +13,8 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     display: none;
 }
+
+.hover-bg-info:hover {
+    background-color: rgb(13,110,253,0.8); /* faded blue color from Bootstrap's bg-info */
+    color: #fff; /* Change the text color for better visibility */
+}

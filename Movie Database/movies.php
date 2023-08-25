@@ -25,9 +25,9 @@ include '../Templates/navbar.php';
            
         </div>
         <div class="card-body">
-            <table class="table table-bordered">
+            <table class="table table-bordered text-center align-middle">
                 <thead class="table-dark">
-                    <tr>
+                    <tr class="align-middle">
                         <th style="width: 6%">#</th>
                         <th style="width: 25%">Name</th>
                         <th style="width: 15%">Media Type</th>

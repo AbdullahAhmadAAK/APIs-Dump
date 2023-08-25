@@ -40,12 +40,12 @@ if(isset($_GET['action']) && $_GET['action']=="getMovieDetails" )  {
     if (isset($responseArray['d'])) {
         ob_start();
         
-        // pagination
+        // pagination helpers 
         $limit = 10; // will show 10 results at 1 page
-        $start_at = ($limit * ($page_num - 1)) + 1;
-        $last_index = $start_at + $limit;
-        $index = $start_at;
-        $total_records = count($responseArray['d']);
+        $start_at = ($limit * ($page_num - 1)) + 1; // this is supposed to be the # of record which is displayed 1st
+        $last_index = $start_at + $limit; // this is supposed to be the ( # of last displayed record + 1)
+        $index = $start_at; // this is a running index counter
+        $total_records = count($responseArray['d']); // this is the total records that are found in database
 
         foreach ($responseArray['d'] as $movieKey => $movieDetails) {
             if($index >= $last_index) {
@@ -58,37 +58,51 @@ if(isset($_GET['action']) && $_GET['action']=="getMovieDetails" )  {
                     <td><?= isset($movieDetails['q']) && $movieDetails['q'] != "" ? $movieDetails['q'] : "Unspecified" ?></td>
                     <td><?= isset($movieDetails['s']) && $movieDetails['s'] != "" ? $movieDetails['s'] : "Unspecified" ?></td>
                     <td>
-                        <img src="<?= isset($movieDetails['i']['imageUrl']) ? $movieDetails['i']['imageUrl'] : 'movie_placeholder.jpg' ?>" alt="Picture of <?= isset($movieDetails['l']) ? $movieDetails['l'] . ", the movie" : "an unnamed movie" ?>" width="400px" height="400px">
+                        <div class="ratio ratio-4x3">
+                            <img src="<?= isset($movieDetails['i']['imageUrl']) ? $movieDetails['i']['imageUrl'] : 'movie_placeholder.jpg' ?>" 
+                            alt="Picture of <?= isset($movieDetails['l']) ? $movieDetails['l'] . ", the movie" : "an unnamed movie" ?>" 
+                            class="img-fluid">
+                        </div>
                     </td>
                 </tr>
             <?php
         }
         $html = ob_get_clean();
 
+        // pagination helpers
+        $num_links = 2; // 2 for forward, 2 for backward
+        $last_page = ceil($total_records/$limit);
+
         ob_start();
         ?>
-        <div class="float-left">Showing <?= $start_at ?> to <?= $index-1 ?> of <?= $total_records ?> </div>
-        <nav aria-label="...">
-            <ul class="pagination">
-                <li class="page-item disabled">
-                    <span class="page-link">Previous</span>
-                </li>
-                <li class="page-item">
-                    <!-- <a class="page-link" href="#">1</a> -->
-                    <button class="page-link" onclick="getMovieDetails(1)">1</button>
-                </li>
-                <li class="page-item active">
-                <span class="page-link">
-                    2
-                    <span class="sr-only">(current)</span>
-                </span>
-                </li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                <a class="page-link" href="#">Next</a>
-                </li>
-            </ul>
-        </nav>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="float-left">
+                Showing <?= $start_at ?> to <?= $index-1 ?> of <?= $total_records ?>  records
+            </div>
+            <nav aria-label="">
+                <ul class="pagination">
+                    <li class="page-item">
+                        <button class="page-link hover-bg-info" onclick="getMovieDetails(1)">first</button>
+                    </li>
+                    <?php if($page_num-1 > 0) { ?>
+                        <li class="page-item">
+                            <button class="page-link hover-bg-info" onclick="getMovieDetails(<?= $page_num - 1 ?>)">prev</button>
+                        </li>
+                    <?php } ?>
+                    <li class="page-item">
+                        <button class="page-link active hover-bg-info" onclick="getMovieDetails(<?= $page_num ?>)"><?= $page_num ?></button>
+                    </li>
+                    <?php if($page_num+1 <= $last_page) { ?> 
+                    <li class="page-item">
+                        <button class="page-link hover-bg-info" onclick="getMovieDetails(<?= $page_num + 1 ?>)">next</button>
+                    </li>
+                    <?php } ?>
+                    <li class="page-item">
+                        <button class="page-link hover-bg-info" onclick="getMovieDetails(<?= $last_page ?>)">last</button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
         <?php
         $pagination = ob_get_clean();
 
