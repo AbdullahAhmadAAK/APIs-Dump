@@ -6,11 +6,10 @@ if(isset($_GET['action']) && $_GET['action']=="getMovieDetails" )  {
     $moviename_query_form = strtolower(str_replace(" ", "%20", $moviename));
     $page_num = $_GET['pg_num'];
 
-    
     $curl = curl_init();
 
     curl_setopt_array($curl, [
-        CURLOPT_URL => "https://online-movie-database.p.rapidapi.com/auto-complete?q=".$moviename_query_form,
+        CURLOPT_URL => "https://imdb-search2.p.rapidapi.com/".$moviename_query_form,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => "",
         CURLOPT_MAXREDIRS => 10,
@@ -18,7 +17,7 @@ if(isset($_GET['action']) && $_GET['action']=="getMovieDetails" )  {
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => "GET",
         CURLOPT_HTTPHEADER => [
-            "X-RapidAPI-Host: online-movie-database.p.rapidapi.com",
+            "X-RapidAPI-Host: imdb-search2.p.rapidapi.com",
             "X-RapidAPI-Key: 62b1eab6ddmsh901e2fb3d7df102p1a8884jsn1c82e8127c80"
         ],
     ]);
@@ -28,16 +27,13 @@ if(isset($_GET['action']) && $_GET['action']=="getMovieDetails" )  {
 
     curl_close($curl);
 
-    // if ($err) {
-    //     echo "cURL Error #:" . $err;
-    // } else {
-    //     // echo $response;
-    //     die(json_encode(["content" => $response['d']]));
-    // }
+    if ($err) {
+        die(json_encode(["content" => $err, "status" => "error"]));
+    } 
 
     $responseArray = json_decode($response, true); // Decode the JSON string into an associative array
 
-    if (isset($responseArray['d'])) {
+    if (isset($responseArray['description'])) {
         ob_start();
         
         // pagination helpers 
@@ -45,22 +41,29 @@ if(isset($_GET['action']) && $_GET['action']=="getMovieDetails" )  {
         $start_at = ($limit * ($page_num - 1)) + 1; // this is supposed to be the # of record which is displayed 1st
         $last_index = $start_at + $limit; // this is supposed to be the ( # of last displayed record + 1)
         $index = $start_at; // this is a running index counter
-        $total_records = count($responseArray['d']); // this is the total records that are found in database
+        $total_records = count($responseArray['description']); // this is the total records that are found in database
 
-        foreach ($responseArray['d'] as $movieKey => $movieDetails) {
+        foreach ($responseArray['description'] as $movieKey => $movieDetails) {
             if($index >= $last_index) {
                 break;
             }
             ?>
                 <tr>
                     <th><?= $index++ ?></th>
-                    <td><?= isset($movieDetails['l']) && $movieDetails['l'] != "" ? $movieDetails['l'] : "Unnamed" ?></td>
-                    <td><?= isset($movieDetails['q']) && $movieDetails['q'] != "" ? $movieDetails['q'] : "Unspecified" ?></td>
-                    <td><?= isset($movieDetails['s']) && $movieDetails['s'] != "" ? $movieDetails['s'] : "Unspecified" ?></td>
+                    <td>
+                        <?php if(isset($movieDetails['#IMDB_URL']) && $movieDetails['#IMDB_URL'] != "") { ?> 
+                        <a target="_blank" href="<?= $movieDetails['#IMDB_URL'] ?>"> <?php } ?>
+                            <?= isset($movieDetails['#TITLE']) && $movieDetails['#TITLE'] != "" ? $movieDetails['#TITLE'] : "Unnamed" ?>
+                            <?= isset($movieDetails['#YEAR']) && $movieDetails['#YEAR'] != "" ? "(".$movieDetails['#YEAR'].")" : "" ?>
+                        <?php if(isset($movieDetails['#IMDB_URL']) && $movieDetails['#IMDB_URL'] != "") { ?> 
+                        </a> <?php } ?>
+                    </td>
+                    <td><?= isset($movieDetails['#RANK']) && $movieDetails['#RANK'] != "" ? "#".$movieDetails['#RANK'] : "Unspecified" ?></td>
+                    <td><?= isset($movieDetails['#ACTORS']) && $movieDetails['#ACTORS'] != "" ? $movieDetails['#ACTORS'] : "Unspecified" ?></td>
                     <td>
                         <div class="ratio ratio-4x3">
-                            <img src="<?= isset($movieDetails['i']['imageUrl']) ? $movieDetails['i']['imageUrl'] : 'movie_placeholder.jpg' ?>" 
-                            alt="Picture of <?= isset($movieDetails['l']) ? $movieDetails['l'] . ", the movie" : "an unnamed movie" ?>" 
+                            <img src="<?= isset($movieDetails['#IMG_POSTER']) ? $movieDetails['#IMG_POSTER'] : './Media/movie_placeholder.jpg' ?>" 
+                            alt="Picture of <?= isset($movieDetails['#TITLE']) ? $movieDetails['#TITLE'] . ", the movie" : "an unnamed movie" ?>" 
                             class="img-fluid">
                         </div>
                     </td>

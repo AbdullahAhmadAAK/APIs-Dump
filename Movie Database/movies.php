@@ -30,7 +30,7 @@ include '../Templates/navbar.php';
                     <tr class="align-middle">
                         <th style="width: 6%">#</th>
                         <th style="width: 25%">Name</th>
-                        <th style="width: 15%">Media Type</th>
+                        <th style="width: 15%">Rank</th>
                         <th style="width: 20%">Actors</th>
                         <th style="width: 34%">Image</th>
                     </tr>
